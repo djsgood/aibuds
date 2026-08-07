@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AIBuds — your ai employee</title>
+<title>AIBuds — Your AI Employee</title>
 <style>
 :root{--bg:#07111f;--panel:#0d1a2b;--border:#1d334d;--text:#e9f2fb;--muted:#8fa4ba;--accent:#25c7f5;--green:#39d98a;--yellow:#f5c451;--red:#ff6b7a}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#06101d,#091728 55%,#07111f);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
@@ -20,13 +20,14 @@ input{width:100%;background:#091726;border:1px solid var(--border);color:white;p
 .priorities-card{margin-top:16px}.ai-priority-list{display:grid;gap:12px}.ai-priority-item{padding:16px;border:1px solid var(--border);border-radius:12px;background:#0a1727}.ai-priority-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.ai-priority-row strong{display:block;font-size:15px;margin-bottom:6px}.ai-priority-row span{color:var(--muted);font-size:12px}.priority-badge{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}.priority-high{background:rgba(255,107,122,.12);border:1px solid rgba(255,107,122,.45);color:#ff8d9a}.priority-medium{background:rgba(245,196,81,.12);border:1px solid rgba(245,196,81,.45);color:#f7d56d}.priority-low{background:rgba(57,217,138,.12);border:1px solid rgba(57,217,138,.45);color:#7debb1}.ai-priority-meta{display:flex;justify-content:space-between;gap:12px;margin-top:12px;color:var(--muted);font-size:12px}.ai-priority-recommendation{margin-top:12px;padding:12px 14px;border-radius:9px;background:#0d2233;border:1px solid #21445c;color:#d9ebf8;font-size:13px;line-height:1.5}
 .ai-command-shell{margin:18px 0 20px;padding:24px;border:1px solid var(--border);border-radius:18px;background:linear-gradient(145deg,#0b1b2d,#0d2134);box-shadow:0 12px 28px rgba(0,0,0,.14)}.ai-command-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.ai-command-header h2{margin:4px 0 0;font-size:34px;letter-spacing:-.04em}.ai-command-header p{margin:8px 0 0;color:var(--muted);font-size:15px}.ai-summary-row{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:12px}.ai-summary-card{padding:16px 14px;border:1px solid var(--border);background:rgba(8,17,24,.7);border-radius:12px;display:grid;gap:8px}.ai-summary-card span{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}.ai-summary-card strong{font-size:24px;letter-spacing:-.04em}.ai-layout{display:grid;grid-template-columns:1.7fr .9fr;gap:18px;margin:18px 0 24px}.ai-main-column{display:grid;gap:18px}.priorities-card,.tasks-card,.snapshot-card{padding:22px 18px}.task-list,.suggested-tasks-list{display:grid;gap:12px}.task-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:#0a1727;color:var(--text)}.task-icon{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:rgba(37,199,245,.08);border:1px solid rgba(37,199,245,.18);font-size:18px}.snapshot-card{align-self:start}.snapshot-list{display:grid;gap:12px;margin-top:12px}.snapshot-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid rgba(142,164,186,.16);border-radius:10px;background:rgba(9,18,27,.7)}.snapshot-row span{color:var(--muted)}.snapshot-row strong{font-size:18px;letter-spacing:-.03em}.ai-priority-list{display:grid;gap:12px}.ai-priority-item{padding:16px;border:1px solid var(--border);border-radius:12px;background:#0a1727}.ai-priority-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.ai-priority-row strong{display:block;font-size:15px;margin-bottom:6px}.ai-priority-row span{color:var(--muted);font-size:12px}.priority-badge{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}.priority-high{background:rgba(255,107,122,.12);border:1px solid rgba(255,107,122,.45);color:#ff8d9a}.priority-medium{background:rgba(245,196,81,.12);border:1px solid rgba(245,196,81,.45);color:#f7d56d}.priority-low{background:rgba(57,217,138,.12);border:1px solid rgba(57,217,138,.45);color:#7debb1}.ai-priority-meta{display:flex;justify-content:space-between;gap:12px;margin-top:12px;color:var(--muted);font-size:12px}.ai-priority-recommendation{margin-top:12px;padding:12px 14px;border-radius:9px;background:#0d2233;border:1px solid #21445c;color:#d9ebf8;font-size:13px;line-height:1.5}
 .summary-title{margin:8px 0 16px;color:var(--text);font-size:16px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.tagline{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.6}.today-date{margin-top:8px;color:var(--accent);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 @media(max-width:900px){.side{width:190px}.grid{grid-template-columns:1fr 1fr}.layout,.roi{grid-template-columns:1fr}}@media(max-width:650px){.app{display:block}.side{width:100%;border-right:0;border-bottom:1px solid var(--border)}.grid{grid-template-columns:1fr}.main{padding:18px}.ai-priority-meta{flex-direction:column}.ai-priority-row{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
 <body>
 <div class="app">
 <aside class="side">
-  <div class="brand">AI<span>Bud</span>Bots</div>
+  <div class="brand">AI<span>Bud</span>s</div>
   <div class="nav">
     <button class="active" onclick="show('dashboard',this)">▦ Dashboard</button>
     <button onclick="show('leads',this)">◉ Leads</button>
@@ -35,7 +36,7 @@ input{width:100%;background:#091726;border:1px solid var(--border);color:white;p
   </div>
 </aside>
 <main class="main">
-  <div class="top"><div><div class="eyebrow">AIBudBots POC</div><div class="title">Lead Recovery Hub</div></div><div class="demo">● DEMO MODE — NO REAL MESSAGES</div></div>
+  <div class="top"><div><div class="eyebrow">AIBuds</div><div class="title">Your AI Employee</div><div class="tagline">Recover leads. Book more jobs. Automate repetitive work.</div></div><div class="demo">● DEMO MODE — NO REAL MESSAGES</div></div>
 
   <section id="dashboard">
     <div class="ai-command-shell">
@@ -44,10 +45,11 @@ input{width:100%;background:#091726;border:1px solid var(--border);color:white;p
           <div class="eyebrow">🤖 AI Command Center</div>
           <h2 id="greetingText">Good Morning</h2>
           <p>Welcome back.</p>
+          <p class="today-date" id="todayDateText">Today</p>
         </div>
       </div>
 
-      <div class="summary-title">Today's Summary</div>
+      <div class="summary-title">Today's Business Snapshot</div>
 
       <div class="ai-summary-row">
         <div class="ai-summary-card">
@@ -63,7 +65,7 @@ input{width:100%;background:#091726;border:1px solid var(--border);color:white;p
           <strong id="summaryHighPriority">0</strong>
         </div>
         <div class="ai-summary-card">
-          <span>Appointments Today</span>
+          <span>Appointments</span>
           <strong id="summaryAppointments">0</strong>
         </div>
         <div class="ai-summary-card">
@@ -71,8 +73,8 @@ input{width:100%;background:#091726;border:1px solid var(--border);color:white;p
           <strong id="summaryPotentialRevenue">$0</strong>
         </div>
         <div class="ai-summary-card">
-          <span>Follow-Ups Due</span>
-          <strong id="summaryFollowUps">0</strong>
+          <span>Revenue Recovered</span>
+          <strong id="summaryRevenueRecovered">$0</strong>
         </div>
       </div>
     </div>
@@ -91,27 +93,23 @@ input{width:100%;background:#091726;border:1px solid var(--border);color:white;p
       </div>
 
       <aside class="card snapshot-card">
-        <div class="section-title">Business Snapshot</div>
+        <div class="section-title">Business Health</div>
         <div class="snapshot-list">
           <div class="snapshot-row">
-            <span>Potential Revenue</span>
-            <strong id="snapshotPotentialRevenue">$0</strong>
+            <span>Lead Conversion %</span>
+            <strong id="businessLeadConversion">0%</strong>
           </div>
           <div class="snapshot-row">
-            <span>Jobs Won</span>
-            <strong id="snapshotJobsWon">0</strong>
+            <span>Average Lead Value</span>
+            <strong id="businessAverageLeadValue">$0</strong>
           </div>
           <div class="snapshot-row">
-            <span>Jobs Lost</span>
-            <strong id="snapshotJobsLost">0</strong>
+            <span>Open Opportunities</span>
+            <strong id="businessOpenOpportunities">0</strong>
           </div>
           <div class="snapshot-row">
-            <span>Conversion Rate</span>
-            <strong id="snapshotConversionRate">0%</strong>
-          </div>
-          <div class="snapshot-row">
-            <span>Hours Saved</span>
-            <strong id="snapshotHoursSaved">0h</strong>
+            <span>Estimated Revenue</span>
+            <strong id="businessEstimatedRevenue">$0</strong>
           </div>
         </div>
       </aside>
@@ -155,7 +153,7 @@ input{width:100%;background:#091726;border:1px solid var(--border);color:white;p
       </div>
       <div class="timeline">
         <div class="section-title">Interaction Timeline</div>
-        <div class="event"><div class="time">Today · Demo</div><div>Lead imported into AIBudBots.</div></div>
+        <div class="event"><div class="time">Today · Demo</div><div>Lead imported into AIBuds.</div></div>
         <div class="event"><div class="time">Request</div><div>Bob requested an appointment to receive a quote for a deck build.</div></div>
       </div>
     </div>

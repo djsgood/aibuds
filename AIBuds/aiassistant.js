@@ -1,5 +1,6 @@
-// AI Assistant module for the AIBudBots Command Center.
-// This file owns all rule-based AI logic for prioritization, task generation, and summary metrics.
+// AI Assistant module for the AIBuds Command Center.
+// This file contains all rule-based recommendation logic and summary calculations.
+// It keeps the app modular and avoids any external AI or API dependency.
 
 const aiLeadQueue = [
     {
@@ -32,6 +33,12 @@ const aiLeadQueue = [
         estimatedValue: 12000,
         status: 'Booked',
     },
+    {
+        customerName: 'Mike Adams',
+        serviceRequested: 'Driveway Paving',
+        estimatedValue: 1800,
+        status: 'Contacted',
+    },
 ];
 
 function getGreeting() {
@@ -48,14 +55,21 @@ function getGreeting() {
     return 'Good Evening';
 }
 
+function getTodayDateLabel() {
+    return new Intl.DateTimeFormat('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(new Date());
+}
+
 function getPriorityLevel(lead) {
-    // Rule-based scoring for daily action prioritization.
-    // High priority = value over $3,000 and a New status.
+    // Rule-based prioritization keeps the system deterministic and easy to extend.
     if (lead.estimatedValue > 3000 && lead.status === 'New') {
         return 'High';
     }
 
-    // Medium priority = value between $1,000 and $3,000 or a Contacted status.
     if ((lead.estimatedValue >= 1000 && lead.estimatedValue <= 3000) || lead.status === 'Contacted') {
         return 'Medium';
     }
@@ -87,6 +101,14 @@ function getAiRecommendation(lead) {
     return 'No immediate action required.';
 }
 
+function formatCurrency(value) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0,
+    }).format(Number(value || 0));
+}
+
 function sortLeadsForPriority(leads) {
     const ranking = { High: 3, Medium: 2, Low: 1 };
 
@@ -97,36 +119,43 @@ function sortLeadsForPriority(leads) {
     });
 }
 
-function formatCurrency(value) {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        maximumFractionDigits: 0,
-    }).format(Number(value || 0));
-}
-
 function calculateSummary(leads) {
     const activeLeads = leads.length;
     const newLeads = leads.filter((lead) => lead.status === 'New').length;
     const highPriorityLeads = leads.filter((lead) => getPriorityLevel(lead) === 'High').length;
-    const appointmentsToday = leads.filter((lead) => ['Quoted', 'Booked', 'Contacted'].includes(lead.status)).length;
+    const appointments = leads.filter((lead) => ['Contacted', 'Quoted', 'Booked'].includes(lead.status)).length;
     const potentialRevenue = leads.reduce((sum, lead) => sum + Number(lead.estimatedValue || 0), 0);
+    const revenueRecovered = leads.filter((lead) => lead.status === 'Booked').reduce((sum, lead) => sum + Number(lead.estimatedValue || 0), 0);
     const followUpsDue = leads.filter((lead) => ['New', 'Contacted', 'Quoted'].includes(lead.status)).length;
 
     return {
         activeLeads,
         newLeads,
         highPriorityLeads,
-        appointmentsToday,
+        appointments,
         potentialRevenue,
+        revenueRecovered,
         followUpsDue,
+    };
+}
+
+function calculateBusinessHealth(leads) {
+    const bookCount = leads.filter((lead) => lead.status === 'Booked').length;
+    const totalValue = leads.reduce((sum, lead) => sum + Number(lead.estimatedValue || 0), 0);
+    const openOpportunities = leads.filter((lead) => !['Booked', 'Lost'].includes(lead.status)).length;
+    const averageLeadValue = totalValue / Math.max(leads.length, 1);
+    const conversionRate = Math.round((bookCount / Math.max(leads.length, 1)) * 100);
+
+    return {
+        conversionRate,
+        averageLeadValue,
+        openOpportunities,
+        estimatedRevenue: totalValue,
     };
 }
 
 function generateSuggestedTasks(leads) {
     const tasks = leads.slice(0, 4).map((lead) => {
-        const priority = getPriorityLevel(lead);
-
         if (lead.status === 'New') {
             return `📞 Call ${lead.customerName}`;
         }
@@ -139,7 +168,7 @@ function generateSuggestedTasks(leads) {
             return `📅 Confirm ${lead.customerName} appointment`;
         }
 
-        if (priority === 'High') {
+        if (getPriorityLevel(lead) === 'High') {
             return `📞 Re-engage ${lead.customerName}`;
         }
 
@@ -149,39 +178,31 @@ function generateSuggestedTasks(leads) {
     return tasks;
 }
 
-function renderCommandCenterSummary() {
-    const summary = calculateSummary(aiLeadQueue);
-
+function renderGreetingAndDate() {
     const greetingEl = document.getElementById('greetingText');
+    const dateEl = document.getElementById('todayDateText');
+
     if (greetingEl) {
         greetingEl.textContent = getGreeting();
     }
 
-    const fields = [
+    if (dateEl) {
+        dateEl.textContent = getTodayDateLabel();
+    }
+}
+
+function renderBusinessSnapshot() {
+    const summary = calculateSummary(aiLeadQueue);
+    const summaryFields = [
         ['summaryActiveLeads', summary.activeLeads],
         ['summaryNewLeads', summary.newLeads],
         ['summaryHighPriority', summary.highPriorityLeads],
-        ['summaryAppointments', summary.appointmentsToday],
+        ['summaryAppointments', summary.appointments],
         ['summaryPotentialRevenue', formatCurrency(summary.potentialRevenue)],
-        ['summaryFollowUps', summary.followUpsDue],
+        ['summaryRevenueRecovered', formatCurrency(summary.revenueRecovered)],
     ];
 
-    fields.forEach(([id, value]) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.textContent = value;
-        }
-    });
-
-    const snapshotFields = [
-        ['snapshotPotentialRevenue', formatCurrency(summary.potentialRevenue)],
-        ['snapshotJobsWon', aiLeadQueue.filter((lead) => lead.status === 'Booked').length],
-        ['snapshotJobsLost', aiLeadQueue.filter((lead) => lead.status === 'Lost').length || 1],
-        ['snapshotConversionRate', `${Math.round((aiLeadQueue.filter((lead) => lead.status === 'Booked').length / Math.max(summary.activeLeads, 1)) * 100)}%`],
-        ['snapshotHoursSaved', `${Math.max(12, summary.activeLeads * 4)}h`],
-    ];
-
-    snapshotFields.forEach(([id, value]) => {
+    summaryFields.forEach(([id, value]) => {
         const element = document.getElementById(id);
         if (element) {
             element.textContent = value;
@@ -201,8 +222,8 @@ function renderAiPriorities() {
     container.innerHTML = sortedLeads
         .map((lead) => {
             const priority = getPriorityLevel(lead);
-            const recommendation = getAiRecommendation(lead);
             const badgeClass = getPriorityClass(priority);
+            const recommendation = getAiRecommendation(lead);
 
             return `
                 <div class="ai-priority-item">
@@ -211,7 +232,7 @@ function renderAiPriorities() {
                             <strong>${lead.customerName}</strong>
                             <span>${lead.serviceRequested}</span>
                         </div>
-                        <span class="priority-badge ${badgeClass}">${priority}</span>
+                        <span class="priority-badge ${badgeClass}">${priority} PRIORITY</span>
                     </div>
 
                     <div class="ai-priority-meta">
@@ -238,17 +259,41 @@ function renderSuggestedTasks() {
     const tasks = generateSuggestedTasks(aiLeadQueue);
 
     container.innerHTML = tasks
-        .map((task) => `
-            <div class="task-item">
-                <span class="task-icon">${task.startsWith('📞') ? '📞' : task.startsWith('📧') ? '📧' : task.startsWith('📅') ? '📅' : '📋'}</span>
-                <span>${task}</span>
-            </div>
-        `)
+        .map((task) => {
+            const icon = task.startsWith('📞') ? '📞' : task.startsWith('📧') ? '📧' : task.startsWith('📅') ? '📅' : '📋';
+
+            return `
+                <div class="task-item">
+                    <span class="task-icon">${icon}</span>
+                    <span>${task}</span>
+                </div>
+            `;
+        })
         .join('');
 }
 
+function renderBusinessHealth() {
+    const health = calculateBusinessHealth(aiLeadQueue);
+
+    const healthFields = [
+        ['businessLeadConversion', `${health.conversionRate}%`],
+        ['businessAverageLeadValue', formatCurrency(health.averageLeadValue)],
+        ['businessOpenOpportunities', health.openOpportunities],
+        ['businessEstimatedRevenue', formatCurrency(health.estimatedRevenue)],
+    ];
+
+    healthFields.forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    renderCommandCenterSummary();
+    renderGreetingAndDate();
+    renderBusinessSnapshot();
     renderAiPriorities();
     renderSuggestedTasks();
+    renderBusinessHealth();
 });

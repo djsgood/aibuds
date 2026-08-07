@@ -1,6 +1,6 @@
-# AIBudBots Lead Recovery POC
+# AIBuds AI Employee POC
 
-This is a zero-cost, local proof-of-concept for AIBudBots.
+This is a zero-cost, local proof-of-concept for AIBuds.
 
 ## Run it
 1. Extract the ZIP.

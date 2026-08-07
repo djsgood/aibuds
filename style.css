@@ -757,6 +757,14 @@ textarea {
     border-color: rgba(76, 217, 255, 0.25);
 }
 
+.subtitle {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
 @media (max-width: 1024px) {
     .stats-grid {
         grid-template-columns: repeat(2, minmax(220px, 1fr));
