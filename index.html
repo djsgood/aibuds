@@ -10,94 +10,190 @@
 
 <body>
 
-    <header class="topbar">
-        <div class="brand-group">
-            <div class="brand-mark">A</div>
-            <div>
-                <h1>AIBudBots</h1>
-                <p>AI Lead Recovery Hub</p>
-            </div>
-        </div>
-        <div class="header-actions">
-            <span class="filter-pill">This month</span>
-            <button class="primary-btn">Export report</button>
-        </div>
-    </header>
+    <div class="app-shell">
 
-    <main>
-
-        <section id="dashboard" class="dashboard-shell">
-
-            <div class="section-heading">
+        <aside class="sidebar">
+            <div class="brand-group sidebar-brand">
+                <div class="brand-mark">A</div>
                 <div>
-                    <p class="eyebrow">Overview</p>
-                    <h2>Recovery dashboard</h2>
-                </div>
-                <button id="openLeadModal" class="primary-btn add-lead-btn" type="button">+ Add Lead</button>
-            </div>
-
-            <div id="stats" class="stats-grid">
-
-                <div class="card">
-                    <div class="card-topline">
-                        <span class="card-icon cyan">↗</span>
-                        <span class="trend positive">+18.2%</span>
-                    </div>
-                    <h3>Total Leads</h3>
-                    <p id="leadCount" class="metric-value">2,486</p>
-                    <small>Across all active campaigns</small>
-                </div>
-
-                <div class="card">
-                    <div class="card-topline">
-                        <span class="card-icon cyan">$</span>
-                        <span class="trend positive">+9.4%</span>
-                    </div>
-                    <h3>Revenue Recovered</h3>
-                    <p class="metric-value">$184.2K</p>
-                    <small>Recovered from stalled accounts</small>
-                </div>
-
-                <div class="card">
-                    <div class="card-topline">
-                        <span class="card-icon cyan">✉</span>
-                        <span class="trend positive">+26.1%</span>
-                    </div>
-                    <h3>Follow-Ups Sent</h3>
-                    <p class="metric-value">9,420</p>
-                    <small>Automated sequences delivered</small>
-                </div>
-
-                <div class="card">
-                    <div class="card-topline">
-                        <span class="card-icon cyan">⏱</span>
-                        <span class="trend positive">+42.7%</span>
-                    </div>
-                    <h3>Hours Saved</h3>
-                    <p class="metric-value">312</p>
-                    <small>Manual admin time reclaimed</small>
-                </div>
-
-            </div>
-
-            <div class="lead-panel">
-                <div class="lead-panel-header">
-                    <h3>Lead List</h3>
-                    <span id="leadCountLabel" class="status-inline">0 active</span>
-                </div>
-
-                <div id="leadList" class="lead-list" aria-live="polite">
-                    <div class="empty-state">No leads yet. Add your first prospect to start recovering revenue.</div>
+                    <h1>AIBudBots</h1>
                 </div>
             </div>
 
-            <aside id="leadDetailsPanel" class="details-panel hidden" aria-live="polite">
-                <div id="leadDetailsContent"></div>
-            </aside>
+            <nav class="sidebar-nav" aria-label="Main navigation">
+                <button class="nav-item active" data-page="dashboard" type="button">Dashboard</button>
+                <button class="nav-item" data-page="leads" type="button">Leads</button>
+                <button class="nav-item" data-page="appointments" type="button">Appointments</button>
+                <button class="nav-item" data-page="quotes" type="button">Quotes</button>
+                <button class="nav-item" data-page="ai-assistant" type="button">AI Assistant</button>
+                <button class="nav-item" data-page="analytics" type="button">Analytics</button>
+                <button class="nav-item" data-page="automations" type="button">Automations</button>
+                <button class="nav-item" data-page="settings" type="button">Settings</button>
+            </nav>
+        </aside>
 
-        </section>
+        <main class="main-content">
 
-    </main>
+            <section id="dashboardPage" class="page active">
+                <header class="topbar">
+                    <div class="brand-group">
+                        <div>
+                            <p class="eyebrow">Overview</p>
+                            <h2>Recovery dashboard</h2>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <span class="filter-pill">This month</span>
+                        <button class="primary-btn">Export report</button>
+                    </div>
+                </header>
+
+                <div class="page-toolbar">
+                    <button id="openLeadModal" class="primary-btn add-lead-btn" type="button">+ Add Lead</button>
+                </div>
+
+                <div id="stats" class="stats-grid">
+
+                    <div class="card">
+                        <div class="card-topline">
+                            <span class="card-icon cyan">↗</span>
+                            <span class="trend positive">+18.2%</span>
+                        </div>
+                        <h3>Total Leads</h3>
+                        <p id="leadCount" class="metric-value">2,486</p>
+                        <small>Across all active campaigns</small>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-topline">
+                            <span class="card-icon cyan">$</span>
+                            <span class="trend positive">+9.4%</span>
+                        </div>
+                        <h3>Revenue Recovered</h3>
+                        <p class="metric-value">$184.2K</p>
+                        <small>Recovered from stalled accounts</small>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-topline">
+                            <span class="card-icon cyan">✉</span>
+                            <span class="trend positive">+26.1%</span>
+                        </div>
+                        <h3>Follow-Ups Sent</h3>
+                        <p class="metric-value">9,420</p>
+                        <small>Automated sequences delivered</small>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-topline">
+                            <span class="card-icon cyan">⏱</span>
+                            <span class="trend positive">+42.7%</span>
+                        </div>
+                        <h3>Hours Saved</h3>
+                        <p class="metric-value">312</p>
+                        <small>Manual admin time reclaimed</small>
+                    </div>
+
+                </div>
+
+                <div class="lead-panel">
+                    <div class="lead-panel-header">
+                        <h3>Lead List</h3>
+                        <span id="leadCountLabel" class="status-inline">0 active</span>
+                    </div>
+
+                    <div data-role="lead-list" class="lead-list" aria-live="polite">
+                        <div class="empty-state">No leads yet. Add your first prospect to start recovering revenue.</div>
+                    </div>
+                </div>
+
+                <aside data-role="lead-details-panel" class="details-panel hidden" aria-live="polite">
+                    <div data-role="lead-details-content"></div>
+                </aside>
+            </section>
+
+            <section id="leadsPage" class="page hidden">
+                <header class="page-header">
+                    <div>
+                        <p class="eyebrow">Pipeline</p>
+                        <h2>Lead Management</h2>
+                    </div>
+                    <button id="openLeadModalFromLeads" class="primary-btn add-lead-btn" type="button">+ Add Lead</button>
+                </header>
+
+                <div class="lead-panel">
+                    <div class="lead-panel-header">
+                        <h3>Active Leads</h3>
+                        <span class="status-inline">Live CRM</span>
+                    </div>
+
+                    <div data-role="lead-list" class="lead-list" aria-live="polite">
+                        <div class="empty-state">No leads yet. Add your first prospect to start recovering revenue.</div>
+                    </div>
+                </div>
+
+                <aside data-role="lead-details-panel" class="details-panel hidden" aria-live="polite">
+                    <div data-role="lead-details-content"></div>
+                </aside>
+            </section>
+
+            <section id="appointmentsPage" class="page hidden placeholder-page">
+                <div class="placeholder-box">
+                    <p class="eyebrow">Appointments</p>
+                    <h2>Scheduling Center</h2>
+                    <p>Manage customer calls, discovery meetings, and follow-up appointments.</p>
+                    <span>Coming in the next sprint</span>
+                </div>
+            </section>
+
+            <section id="quotesPage" class="page hidden placeholder-page">
+                <div class="placeholder-box">
+                    <p class="eyebrow">Quotes</p>
+                    <h2>Proposal Workspace</h2>
+                    <p>Track pricing, send proposals, and monitor quote acceptance rates.</p>
+                    <span>Coming in the next sprint</span>
+                </div>
+            </section>
+
+            <section id="aiAssistantPage" class="page hidden placeholder-page">
+                <div class="placeholder-box">
+                    <p class="eyebrow">AI Assistant</p>
+                    <h2>Conversation Copilot</h2>
+                    <p>Automated outreach suggestions, lead scoring, and next-best-action recommendations.</p>
+                    <span>Coming in the next sprint</span>
+                </div>
+            </section>
+
+            <section id="analyticsPage" class="page hidden placeholder-page">
+                <div class="placeholder-box">
+                    <p class="eyebrow">Analytics</p>
+                    <h2>Performance Overview</h2>
+                    <p>Pipeline health, conversion tracking, and revenue insights across all campaigns.</p>
+                    <span>Coming in the next sprint</span>
+                </div>
+            </section>
+
+            <section id="automationsPage" class="page hidden placeholder-page">
+                <div class="placeholder-box">
+                    <p class="eyebrow">Automations</p>
+                    <h2>Workflow Engine</h2>
+                    <p>Automate follow-ups, lead routing, and sales task orchestration.</p>
+                    <span>Coming in the next sprint</span>
+                </div>
+            </section>
+
+            <section id="settingsPage" class="page hidden placeholder-page">
+                <div class="placeholder-box">
+                    <p class="eyebrow">Settings</p>
+                    <h2>Workspace Preferences</h2>
+                    <p>Configure team permissions, integrations, automations, and account settings.</p>
+                    <span>Coming in the next sprint</span>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
 
     <div id="leadModal" class="modal hidden" aria-hidden="true">
         <div class="modal-backdrop" data-close="true"></div>
@@ -163,7 +259,8 @@
         </div>
     </div>
 
-<script type="module" src="leadManager.js"></script>
+    <script type="module" src="leadManager.js"></script>
+    <script type="module" src="appRouter.js"></script>
 
 </body>
 </html>

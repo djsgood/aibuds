@@ -44,14 +44,14 @@ class LeadManager {
         this.selectedLeadId = null;
         this.modal = document.getElementById('leadModal');
         this.form = document.getElementById('leadForm');
-        this.openButton = document.getElementById('openLeadModal');
+        this.openButtons = document.querySelectorAll('#openLeadModal, #openLeadModalFromLeads');
         this.closeButton = document.getElementById('closeLeadModal');
         this.cancelButton = document.getElementById('cancelLeadModal');
-        this.listContainer = document.getElementById('leadList');
+        this.listContainers = Array.from(document.querySelectorAll('[data-role="lead-list"]'));
         this.totalLeadCounter = document.getElementById('leadCount');
         this.leadCountLabel = document.getElementById('leadCountLabel');
-        this.detailsPanel = document.getElementById('leadDetailsPanel');
-        this.detailsContent = document.getElementById('leadDetailsContent');
+        this.detailsPanels = Array.from(document.querySelectorAll('[data-role="lead-details-panel"]'));
+        this.detailsContents = Array.from(document.querySelectorAll('[data-role="lead-details-content"]'));
     }
 
     // Use the existing dashboard value as a base so the total reflects both initial and added leads.
@@ -70,7 +70,10 @@ class LeadManager {
 
     // Connect all modal and form events to the lead lifecycle.
     bindEvents() {
-        this.openButton.addEventListener('click', () => this.openModal());
+        this.openButtons.forEach((button) => {
+            button.addEventListener('click', () => this.openModal());
+        });
+
         this.closeButton.addEventListener('click', () => this.closeModal());
         this.cancelButton.addEventListener('click', () => this.closeModal());
 
@@ -97,21 +100,23 @@ class LeadManager {
             this.form.reset();
         });
 
-        this.listContainer.addEventListener('click', (event) => {
-            const card = event.target.closest('.lead-item');
+        this.listContainers.forEach((container) => {
+            container.addEventListener('click', (event) => {
+                const card = event.target.closest('.lead-item');
 
-            if (!card) {
-                return;
-            }
+                if (!card) {
+                    return;
+                }
 
-            const leadId = card.dataset.leadId;
+                const leadId = card.dataset.leadId;
 
-            if (!leadId) {
-                return;
-            }
+                if (!leadId) {
+                    return;
+                }
 
-            this.selectedLeadId = leadId;
-            this.renderLeadDetails();
+                this.selectedLeadId = leadId;
+                this.renderLeadDetails();
+            });
         });
 
         document.addEventListener('keydown', (event) => {
@@ -202,40 +207,50 @@ class LeadManager {
 
     // Render each lead card with core CRM fields and a colored badge.
     renderLeadList() {
+        const emptyMarkup = '<div class="empty-state">No leads yet. Add your first prospect to start recovering revenue.</div>';
+
         if (!this.leads.length) {
-            this.listContainer.innerHTML = '<div class="empty-state">No leads yet. Add your first prospect to start recovering revenue.</div>';
-            this.leadCountLabel.textContent = '0 active';
+            this.listContainers.forEach((container) => {
+                container.innerHTML = emptyMarkup;
+            });
+            if (this.leadCountLabel) {
+                this.leadCountLabel.textContent = '0 active';
+            }
             this.selectedLeadId = null;
             return;
         }
 
-        this.leadCountLabel.textContent = `${this.leads.length} active`;
+        if (this.leadCountLabel) {
+            this.leadCountLabel.textContent = `${this.leads.length} active`;
+        }
 
-        this.listContainer.innerHTML = this.leads
-            .slice()
-            .reverse()
-            .map((lead) => {
-                const isSelected = lead.id === this.selectedLeadId ? 'selected' : '';
+        this.listContainers.forEach((container) => {
+            container.innerHTML = this.leads
+                .slice()
+                .reverse()
+                .map((lead) => {
+                    const isSelected = lead.id === this.selectedLeadId ? 'selected' : '';
 
-                return `
-                    <article class="lead-item ${isSelected}" data-lead-id="${lead.id}">
-                        <div class="lead-main">
-                            <h4>${this.escapeHtml(lead.customerName)}</h4>
-                            <p>${this.escapeHtml(lead.companyName)}</p>
-                        </div>
+                    return `
+                        <article class="lead-item ${isSelected}" data-lead-id="${lead.id}">
+                            <div class="lead-main">
+                                <h4>${this.escapeHtml(lead.customerName)}</h4>
+                                <p>${this.escapeHtml(lead.companyName)}</p>
+                            </div>
 
-                        <div class="lead-meta">
-                            <span><strong>Service:</strong> ${this.escapeHtml(lead.serviceRequested)}</span>
-                            <span><strong>Value:</strong> ${this.formatCurrency(lead.estimatedValue)}</span>
-                        </div>
+                            <div class="lead-meta">
+                                <span><strong>Service:</strong> ${this.escapeHtml(lead.serviceRequested)}</span>
+                                <span><strong>Value:</strong> ${this.formatCurrency(lead.estimatedValue)}</span>
+                            </div>
 
-                        <div class="lead-badge-wrap">
-                            <span class="lead-status ${this.getStatusClass(lead.status)}">${this.escapeHtml(lead.status)}</span>
-                        </div>
-                    </article>
-                `;
-            })
-            .join('');
+                            <div class="lead-badge-wrap">
+                                <span class="lead-status ${this.getStatusClass(lead.status)}">${this.escapeHtml(lead.status)}</span>
+                            </div>
+                        </article>
+                    `;
+                })
+                .join('');
+        });
     }
 
     // Build the details panel for the selected lead with AI scoring and action buttons.
@@ -243,19 +258,21 @@ class LeadManager {
         const selectedLead = this.leads.find((lead) => lead.id === this.selectedLeadId) || this.leads[this.leads.length - 1];
 
         if (!selectedLead) {
-            this.detailsPanel.classList.add('hidden');
-            this.detailsContent.innerHTML = '';
+            this.detailsPanels.forEach((panel) => panel.classList.add('hidden'));
+            this.detailsContents.forEach((content) => {
+                content.innerHTML = '';
+            });
             return;
         }
 
         this.selectedLeadId = selectedLead.id;
-        this.detailsPanel.classList.remove('hidden');
+        this.detailsPanels.forEach((panel) => panel.classList.remove('hidden'));
 
         const score = this.calculateLeadScore(selectedLead);
         const recommendation = this.getAiRecommendation(selectedLead, score);
         const suggestedAction = this.getSuggestedAction(selectedLead);
 
-        this.detailsContent.innerHTML = `
+        const detailsMarkup = `
             <div class="details-layout">
                 <div class="details-header-row">
                     <div>
@@ -335,11 +352,15 @@ class LeadManager {
             </div>
         `;
 
+        this.detailsContents.forEach((content) => {
+            content.innerHTML = detailsMarkup;
+        });
+
         this.bindDetailActions();
     }
 
     bindDetailActions() {
-        const buttons = this.detailsContent.querySelectorAll('[data-action]');
+        const buttons = this.detailsContents.flatMap((content) => Array.from(content.querySelectorAll('[data-action]')));
 
         buttons.forEach((button) => {
             button.addEventListener('click', () => {
@@ -435,7 +456,9 @@ class LeadManager {
     // Keep the total lead count in sync with the current in-memory list.
     updateLeadCount() {
         const updatedCount = this.baseLeadCount + this.leads.length;
-        this.totalLeadCounter.textContent = updatedCount.toLocaleString();
+        if (this.totalLeadCounter) {
+            this.totalLeadCounter.textContent = updatedCount.toLocaleString();
+        }
     }
 
     escapeHtml(value) {

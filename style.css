@@ -35,6 +35,70 @@ body {
     font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px 18px 24px;
+    gap: 22px;
+}
+
+.sidebar {
+    position: sticky;
+    top: 20px;
+    width: 260px;
+    min-height: calc(100vh - 40px);
+    padding: 18px 14px;
+    background: rgba(10, 19, 28, 0.9);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+}
+
+.sidebar-brand {
+    padding: 8px 10px 18px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(142, 168, 187, 0.12);
+}
+
+.sidebar-brand h1 {
+    margin: 0;
+    font-size: 1.1rem;
+    letter-spacing: -0.04em;
+}
+
+.sidebar-nav {
+    display: grid;
+    gap: 10px;
+    padding-top: 10px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--muted);
+    padding: 12px 14px;
+    text-align: left;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background: rgba(76, 217, 255, 0.08);
+    border-color: rgba(76, 217, 255, 0.18);
+    color: var(--text);
+    transform: translateX(2px);
+}
+
 header,
 main {
     max-width: 1200px;
@@ -761,4 +825,75 @@ textarea {
     .details-actions .secondary-btn {
         width: 100%;
     }
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 18px;
+    margin-bottom: 22px;
+    padding-top: 12px;
+}
+
+.page-header h2 {
+    margin: 0;
+    font-size: clamp(1.9rem, 3vw, 2.5rem);
+    letter-spacing: -0.05em;
+}
+
+.page-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 18px;
+}
+
+.placeholder-page {
+    padding-top: 20px;
+}
+
+.placeholder-box {
+    display: grid;
+    gap: 18px;
+    padding: 32px 28px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(15, 31, 45, 0.92), rgba(12, 24, 35, 0.96));
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+}
+
+.placeholder-box h2 {
+    margin: 0;
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    letter-spacing: -0.05em;
+}
+
+.placeholder-box p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.placeholder-box span {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(76, 217, 255, 0.18);
+    background: rgba(76, 217, 255, 0.08);
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
