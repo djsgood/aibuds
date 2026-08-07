@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIBudBots - Lead Recovery Hub</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="brand-group">
+            <div class="brand-mark">A</div>
+            <div>
+                <h1>AIBudBots</h1>
+                <p>AI Lead Recovery Hub</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <span class="filter-pill">This month</span>
+            <button class="primary-btn">Export report</button>
+        </div>
+    </header>
+
+    <main>
+
+        <section id="dashboard" class="dashboard-shell">
+
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Overview</p>
+                    <h2>Recovery dashboard</h2>
+                </div>
+                <button id="openLeadModal" class="primary-btn add-lead-btn" type="button">+ Add Lead</button>
+            </div>
+
+            <div id="stats" class="stats-grid">
+
+                <div class="card">
+                    <div class="card-topline">
+                        <span class="card-icon cyan">↗</span>
+                        <span class="trend positive">+18.2%</span>
+                    </div>
+                    <h3>Total Leads</h3>
+                    <p id="leadCount" class="metric-value">2,486</p>
+                    <small>Across all active campaigns</small>
+                </div>
+
+                <div class="card">
+                    <div class="card-topline">
+                        <span class="card-icon cyan">$</span>
+                        <span class="trend positive">+9.4%</span>
+                    </div>
+                    <h3>Revenue Recovered</h3>
+                    <p class="metric-value">$184.2K</p>
+                    <small>Recovered from stalled accounts</small>
+                </div>
+
+                <div class="card">
+                    <div class="card-topline">
+                        <span class="card-icon cyan">✉</span>
+                        <span class="trend positive">+26.1%</span>
+                    </div>
+                    <h3>Follow-Ups Sent</h3>
+                    <p class="metric-value">9,420</p>
+                    <small>Automated sequences delivered</small>
+                </div>
+
+                <div class="card">
+                    <div class="card-topline">
+                        <span class="card-icon cyan">⏱</span>
+                        <span class="trend positive">+42.7%</span>
+                    </div>
+                    <h3>Hours Saved</h3>
+                    <p class="metric-value">312</p>
+                    <small>Manual admin time reclaimed</small>
+                </div>
+
+            </div>
+
+            <div class="lead-panel">
+                <div class="lead-panel-header">
+                    <h3>Lead List</h3>
+                    <span id="leadCountLabel" class="status-inline">0 active</span>
+                </div>
+
+                <div id="leadList" class="lead-list" aria-live="polite">
+                    <div class="empty-state">No leads yet. Add your first prospect to start recovering revenue.</div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <div id="leadModal" class="modal hidden" aria-hidden="true">
+        <div class="modal-backdrop" data-close="true"></div>
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+            <div class="modal-header">
+                <div>
+                    <p class="eyebrow modal-eyebrow">New Lead</p>
+                    <h3 id="leadModalTitle">Add a prospect</h3>
+                </div>
+                <button id="closeLeadModal" class="icon-button" type="button" aria-label="Close modal">×</button>
+            </div>
+
+            <form id="leadForm">
+                <div class="form-grid">
+                    <label>
+                        <span>Customer Name</span>
+                        <input type="text" name="customerName" placeholder="Alex Morgan" required>
+                    </label>
+
+                    <label>
+                        <span>Company Name</span>
+                        <input type="text" name="companyName" placeholder="Northstar Labs" required>
+                    </label>
+
+                    <label>
+                        <span>Phone</span>
+                        <input type="tel" name="phone" placeholder="(555) 123-4567" required>
+                    </label>
+
+                    <label>
+                        <span>Email</span>
+                        <input type="email" name="email" placeholder="alex@company.com" required>
+                    </label>
+
+                    <label>
+                        <span>Service Requested</span>
+                        <select name="serviceRequested" required>
+                            <option value="">Select a service</option>
+                            <option value="Lead Generation">Lead Generation</option>
+                            <option value="Sales Enablement">Sales Enablement</option>
+                            <option value="CRM Cleanup">CRM Cleanup</option>
+                            <option value="Outbound Automation">Outbound Automation</option>
+                            <option value="Brand Messaging">Brand Messaging</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        <span>Estimated Job Value</span>
+                        <input type="number" name="estimatedValue" min="0" step="100" placeholder="2500" required>
+                    </label>
+
+                    <label class="full-width">
+                        <span>Notes</span>
+                        <textarea name="notes" rows="4" placeholder="Add context about the opportunity, objections, or next steps..."></textarea>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="secondary-btn" id="cancelLeadModal">Cancel</button>
+                    <button type="submit" class="primary-btn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script type="module" src="leadManager.js"></script>
+
+</body>
+</html>
