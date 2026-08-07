@@ -1,5 +1,5 @@
 // Lead management module for the AIBuds CRM foundation.
-// This file keeps the lead data model, modal behavior, and rendering logic in memory only.
+// This file keeps the lead data model, modal behavior, rendering, and detail panel logic in memory only.
 
 const leads = [];
 
@@ -41,6 +41,7 @@ class LeadManager {
     constructor() {
         this.baseLeadCount = this.getBaseLeadCount();
         this.leads = leads;
+        this.selectedLeadId = null;
         this.modal = document.getElementById('leadModal');
         this.form = document.getElementById('leadForm');
         this.openButton = document.getElementById('openLeadModal');
@@ -49,6 +50,8 @@ class LeadManager {
         this.listContainer = document.getElementById('leadList');
         this.totalLeadCounter = document.getElementById('leadCount');
         this.leadCountLabel = document.getElementById('leadCountLabel');
+        this.detailsPanel = document.getElementById('leadDetailsPanel');
+        this.detailsContent = document.getElementById('leadDetailsContent');
     }
 
     // Use the existing dashboard value as a base so the total reflects both initial and added leads.
@@ -62,6 +65,7 @@ class LeadManager {
         this.bindEvents();
         this.renderLeadList();
         this.updateLeadCount();
+        this.renderLeadDetails();
     }
 
     // Connect all modal and form events to the lead lifecycle.
@@ -85,10 +89,29 @@ class LeadManager {
             }
 
             this.leads.push(newLead);
+            this.selectedLeadId = newLead.id;
             this.renderLeadList();
+            this.renderLeadDetails();
             this.updateLeadCount();
             this.closeModal();
             this.form.reset();
+        });
+
+        this.listContainer.addEventListener('click', (event) => {
+            const card = event.target.closest('.lead-item');
+
+            if (!card) {
+                return;
+            }
+
+            const leadId = card.dataset.leadId;
+
+            if (!leadId) {
+                return;
+            }
+
+            this.selectedLeadId = leadId;
+            this.renderLeadDetails();
         });
 
         document.addEventListener('keydown', (event) => {
@@ -150,13 +173,27 @@ class LeadManager {
         }).format(Number(value || 0));
     }
 
+    formatDate(dateString) {
+        const date = new Date(dateString);
+
+        if (Number.isNaN(date.getTime())) {
+            return '—';
+        }
+
+        return new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        }).format(date);
+    }
+
     getStatusClass(status) {
         const map = {
             New: 'status-new',
             Contacted: 'status-contacted',
             Qualified: 'status-qualified',
-            Proposal: 'status-proposal',
-            Won: 'status-won',
+            Quoted: 'status-proposal',
+            Booked: 'status-won',
             Lost: 'status-lost',
         };
 
@@ -168,6 +205,7 @@ class LeadManager {
         if (!this.leads.length) {
             this.listContainer.innerHTML = '<div class="empty-state">No leads yet. Add your first prospect to start recovering revenue.</div>';
             this.leadCountLabel.textContent = '0 active';
+            this.selectedLeadId = null;
             return;
         }
 
@@ -177,8 +215,10 @@ class LeadManager {
             .slice()
             .reverse()
             .map((lead) => {
+                const isSelected = lead.id === this.selectedLeadId ? 'selected' : '';
+
                 return `
-                    <article class="lead-item">
+                    <article class="lead-item ${isSelected}" data-lead-id="${lead.id}">
                         <div class="lead-main">
                             <h4>${this.escapeHtml(lead.customerName)}</h4>
                             <p>${this.escapeHtml(lead.companyName)}</p>
@@ -196,6 +236,200 @@ class LeadManager {
                 `;
             })
             .join('');
+    }
+
+    // Build the details panel for the selected lead with AI scoring and action buttons.
+    renderLeadDetails() {
+        const selectedLead = this.leads.find((lead) => lead.id === this.selectedLeadId) || this.leads[this.leads.length - 1];
+
+        if (!selectedLead) {
+            this.detailsPanel.classList.add('hidden');
+            this.detailsContent.innerHTML = '';
+            return;
+        }
+
+        this.selectedLeadId = selectedLead.id;
+        this.detailsPanel.classList.remove('hidden');
+
+        const score = this.calculateLeadScore(selectedLead);
+        const recommendation = this.getAiRecommendation(selectedLead, score);
+        const suggestedAction = this.getSuggestedAction(selectedLead);
+
+        this.detailsContent.innerHTML = `
+            <div class="details-layout">
+                <div class="details-header-row">
+                    <div>
+                        <p class="eyebrow">Lead Details</p>
+                        <h3>${this.escapeHtml(selectedLead.customerName)}</h3>
+                    </div>
+                    <span class="lead-status ${this.getStatusClass(selectedLead.status)}">${this.escapeHtml(selectedLead.status)}</span>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Customer Name</span>
+                        <strong>${this.escapeHtml(selectedLead.customerName)}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Company</span>
+                        <strong>${this.escapeHtml(selectedLead.companyName)}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Phone</span>
+                        <strong>${this.escapeHtml(selectedLead.phone)}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <strong>${this.escapeHtml(selectedLead.email)}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Service Requested</span>
+                        <strong>${this.escapeHtml(selectedLead.serviceRequested)}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estimated Job Value</span>
+                        <strong>${this.formatCurrency(selectedLead.estimatedValue)}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <strong>${this.escapeHtml(selectedLead.status)}</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date Created</span>
+                        <strong>${this.formatDate(selectedLead.createdDate)}</strong>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="detail-label">Notes</span>
+                    <p>${this.escapeHtml(selectedLead.notes || 'No additional notes provided.')}</p>
+                </div>
+
+                <div class="ai-panel">
+                    <div class="ai-header">
+                        <p class="eyebrow">AI Assistant</p>
+                        <h4>Opportunity guidance</h4>
+                    </div>
+
+                    <div class="ai-grid">
+                        <div class="ai-metric">
+                            <span>Lead Score</span>
+                            <strong>${score}/100</strong>
+                        </div>
+                        <div class="ai-metric">
+                            <span>AI Recommendation</span>
+                            <strong>${this.escapeHtml(recommendation)}</strong>
+                        </div>
+                        <div class="ai-metric full-width">
+                            <span>Suggested Next Action</span>
+                            <strong>${this.escapeHtml(suggestedAction)}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-actions">
+                    <button type="button" class="primary-btn" data-action="follow-up">Generate Follow-Up</button>
+                    <button type="button" class="secondary-btn" data-action="contacted">Mark Contacted</button>
+                    <button type="button" class="secondary-btn highlight" data-action="booked">Mark Booked</button>
+                </div>
+            </div>
+        `;
+
+        this.bindDetailActions();
+    }
+
+    bindDetailActions() {
+        const buttons = this.detailsContent.querySelectorAll('[data-action]');
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const action = button.dataset.action;
+                const lead = this.leads.find((item) => item.id === this.selectedLeadId);
+
+                if (!lead) {
+                    return;
+                }
+
+                if (action === 'follow-up') {
+                    lead.status = 'Quoted';
+                }
+
+                if (action === 'contacted') {
+                    lead.status = 'Contacted';
+                }
+
+                if (action === 'booked') {
+                    lead.status = 'Booked';
+                }
+
+                this.renderLeadList();
+                this.renderLeadDetails();
+            });
+        });
+    }
+
+    calculateLeadScore(lead) {
+        let score = 35;
+
+        if (lead.estimatedValue > 3000) {
+            score += 30;
+        }
+
+        if (lead.status === 'New') {
+            score += 20;
+        } else if (lead.status === 'Contacted') {
+            score += 15;
+        } else if (lead.status === 'Quoted') {
+            score += 10;
+        } else if (lead.status === 'Booked') {
+            score += 25;
+        }
+
+        if (lead.notes && lead.notes.trim().length > 20) {
+            score += 10;
+        }
+
+        return Math.min(score, 100);
+    }
+
+    getAiRecommendation(lead, score) {
+        if (lead.status === 'New') {
+            return 'Immediate follow-up recommended';
+        }
+
+        if (lead.status === 'Quoted') {
+            return 'Check in after 48 hours';
+        }
+
+        if (lead.status === 'Booked') {
+            return 'Great fit — keep momentum and confirm kickoff';
+        }
+
+        if (score >= 80) {
+            return 'High-priority opportunity';
+        }
+
+        return 'Continue nurturing with value-based outreach';
+    }
+
+    getSuggestedAction(lead) {
+        if (lead.status === 'New') {
+            return 'Call within 30 minutes and send a personalized recap';
+        }
+
+        if (lead.status === 'Quoted') {
+            return 'Follow up in 48 hours with pricing confirmation and a clear next step';
+        }
+
+        if (lead.status === 'Contacted') {
+            return 'Share a tailored solution brief and invite a discovery call';
+        }
+
+        if (lead.status === 'Booked') {
+            return 'Prepare onboarding and confirm timelines with the client';
+        }
+
+        return 'Send a relevant follow-up and re-qualify the opportunity';
     }
 
     // Keep the total lead count in sync with the current in-memory list.
