@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AIBuds — your ai employee</title>
 <style>
-:root{--bg:#07111f;--panel:#0d1a2b;--panel2:#101f33;--border:#1d334d;--text:#e9f2fb;--muted:#8fa4ba;--accent:#25c7f5;--green:#39d98a;--yellow:#f5c451;--red:#ff6b7a}
+:root{--bg:#07111f;--panel:#0d1a2b;--border:#1d334d;--text:#e9f2fb;--muted:#8fa4ba;--accent:#25c7f5;--green:#39d98a;--yellow:#f5c451;--red:#ff6b7a}
 *{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#06101d,#091728 55%,#07111f);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
 .app{display:flex;min-height:100vh}.side{width:235px;background:#07111e;border-right:1px solid var(--border);padding:24px 16px}.brand{font-size:21px;font-weight:800;margin:0 8px 30px}.brand span{color:var(--accent)}
 .nav button{width:100%;background:none;border:0;color:var(--muted);padding:12px;border-radius:9px;text-align:left;margin:3px 0;cursor:pointer;font-size:14px}.nav button.active,.nav button:hover{background:#102238;color:white}
@@ -17,7 +17,8 @@ button.primary{background:var(--accent);color:#04111c;border:0;border-radius:8px
 .ai{background:linear-gradient(145deg,#0d2134,#0b1727);border-color:#1e536a}.reason{color:#a8bdd0;font-size:13px;line-height:1.5}.message{background:#071522;border:1px solid #21445c;border-radius:9px;padding:13px;line-height:1.55;font-size:13px;margin-top:12px}
 input{width:100%;background:#091726;border:1px solid var(--border);color:white;padding:11px;border-radius:8px;margin:6px 0 13px}label{font-size:12px;color:var(--muted)}
 .roi{display:grid;grid-template-columns:1fr 1fr;gap:16px}.big{font-size:38px;font-weight:850;color:var(--green)}.hidden{display:none}
-@media(max-width:900px){.side{width:190px}.grid{grid-template-columns:1fr 1fr}.layout,.roi{grid-template-columns:1fr}}@media(max-width:650px){.app{display:block}.side{width:100%;border-right:0;border-bottom:1px solid var(--border)}.grid{grid-template-columns:1fr}.main{padding:18px}}
+.priorities-card{margin-top:16px}.ai-priority-list{display:grid;gap:12px}.ai-priority-item{padding:16px;border:1px solid var(--border);border-radius:12px;background:#0a1727}.ai-priority-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.ai-priority-row strong{display:block;font-size:15px;margin-bottom:6px}.ai-priority-row span{color:var(--muted);font-size:12px}.priority-badge{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}.priority-high{background:rgba(255,107,122,.12);border:1px solid rgba(255,107,122,.45);color:#ff8d9a}.priority-medium{background:rgba(245,196,81,.12);border:1px solid rgba(245,196,81,.45);color:#f7d56d}.priority-low{background:rgba(57,217,138,.12);border:1px solid rgba(57,217,138,.45);color:#7debb1}.ai-priority-meta{display:flex;justify-content:space-between;gap:12px;margin-top:12px;color:var(--muted);font-size:12px}.ai-priority-recommendation{margin-top:12px;padding:12px 14px;border-radius:9px;background:#0d2233;border:1px solid #21445c;color:#d9ebf8;font-size:13px;line-height:1.5}
+@media(max-width:900px){.side{width:190px}.grid{grid-template-columns:1fr 1fr}.layout,.roi{grid-template-columns:1fr}}@media(max-width:650px){.app{display:block}.side{width:100%;border-right:0;border-bottom:1px solid var(--border)}.grid{grid-template-columns:1fr}.main{padding:18px}.ai-priority-meta{flex-direction:column}.ai-priority-row{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -48,6 +49,11 @@ input{width:100%;background:#091726;border:1px solid var(--border);color:white;p
         <div class="actions"><button class="primary" onclick="openBob()">Open Lead</button><button class="secondary" onclick="runDemo()">Run AI Demo</button><button class="secondary" onclick="resetDemo()">Reset Demo</button></div>
       </div>
       <div class="card ai"><div class="section-title">AI Opportunity</div><div class="reason">Bob requested an appointment for an on-site quote on a substantial deck project. A fast, personalized follow-up can move the lead toward an estimate.</div><div class="message">Recommended: contact Bob and offer to schedule the on-site quote.</div></div>
+    </div>
+
+    <div class="card ai priorities-card" style="margin-top:16px;">
+      <div class="section-title">Today's AI Priorities</div>
+      <div id="aiPriorityList" class="ai-priority-list"></div>
     </div>
   </section>
 
@@ -119,5 +125,6 @@ function roi(){let l=+document.getElementById('leads').value||0,v=+document.getE
 function money(n){return '$'+Math.round(n).toLocaleString()}
 roi()
 </script>
+<script src="aiassistant.js"></script>
 </body>
 </html>
