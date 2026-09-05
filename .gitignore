@@ -1,0 +1,10 @@
+.env
+agent/token.json
+agent/credentials.json
+__pycache__/
+*.pyc
+prospects.json
+enriched_prospects.json
+assets/data/leads.json
+agent/API_Service Details*
+agent/__pycache__/
