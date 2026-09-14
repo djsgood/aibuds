@@ -487,12 +487,10 @@ class LeadManager {
         });
 
         try {
-            const response = await fetch(`${LEADS_API_URL}?${params.toString()}`, {
-                headers: { Accept: 'application/json' },
+            await fetch(`${LEADS_API_URL}?${params.toString()}`, {
+                mode: 'no-cors',
             });
-            const result = await response.json();
-
-            return Boolean(result.success);
+            return true;
         } catch (error) {
             console.warn('Create-lead API unavailable; saving this lead locally.', error);
         }
