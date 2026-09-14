@@ -1,11 +1,13 @@
 // Lead management module for the AIBuds CRM foundation.
 // This file keeps the lead data model, modal behavior, rendering, and detail panel logic in memory only.
 
-const leads = [];
+const LEADS_STORAGE_KEY = 'aibuds-leads';
+const LEADS_API_URL = 'https://script.google.com/macros/s/AKfycbw2TbbigAIsPvEPZuuj1Jel5EprFszhVM-tBhOJy69D8DZSJK4uZe8hYl-3qN4VaIUo/exec';
 
 class Lead {
     constructor({
         id,
+        row,
         createdDate,
         customerName,
         companyName,
@@ -17,6 +19,7 @@ class Lead {
         notes = '',
     }) {
         this.id = id || this.generateId();
+        this.row = row || null;
         this.createdDate = createdDate || new Date().toISOString();
         this.customerName = customerName;
         this.companyName = companyName;
@@ -40,7 +43,7 @@ class Lead {
 class LeadManager {
     constructor() {
         this.baseLeadCount = this.getBaseLeadCount();
-        this.leads = leads;
+        this.leads = this.loadLeads();
         this.selectedLeadId = null;
         this.modal = document.getElementById('leadModal');
         this.form = document.getElementById('leadForm');
@@ -52,6 +55,24 @@ class LeadManager {
         this.leadCountLabel = document.getElementById('leadCountLabel');
         this.detailsPanels = Array.from(document.querySelectorAll('[data-role="lead-details-panel"]'));
         this.detailsContents = Array.from(document.querySelectorAll('[data-role="lead-details-content"]'));
+    }
+
+    loadLeads() {
+        try {
+            const savedLeads = JSON.parse(localStorage.getItem(LEADS_STORAGE_KEY) || '[]');
+
+            if (!Array.isArray(savedLeads)) {
+                return [];
+            }
+
+            return savedLeads.map((lead) => new Lead(lead));
+        } catch (error) {
+            return [];
+        }
+    }
+
+    saveLeads() {
+        localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(this.leads));
     }
 
     // Use the existing dashboard value as a base so the total reflects both initial and added leads.
@@ -66,6 +87,50 @@ class LeadManager {
         this.renderLeadList();
         this.updateLeadCount();
         this.renderLeadDetails();
+        this.syncRemoteLeads();
+    }
+
+    async syncRemoteLeads() {
+        try {
+            const response = await fetch(`${LEADS_API_URL}?action=get_leads`, {
+                headers: { Accept: 'application/json' },
+            });
+            const result = await response.json();
+
+            if (!result.success || !Array.isArray(result.leads)) {
+                return;
+            }
+
+            const remoteLeads = result.leads.map((lead) => new Lead({
+                id: `sheet-${lead.Row}`,
+                row: lead.Row,
+                createdDate: lead.CreatedAt || new Date().toISOString(),
+                customerName: lead.Name || 'Unnamed lead',
+                companyName: lead.Company || 'Direct inquiry',
+                phone: lead.Phone || '',
+                email: lead.Email || '',
+                serviceRequested: lead.Service || 'General inquiry',
+                estimatedValue: lead.EstimatedValue || 0,
+                status: lead.Status || 'New',
+                notes: lead.Message || '',
+            }));
+
+            const remoteEmails = new Set(
+                remoteLeads
+                    .map((lead) => lead.email.toLowerCase())
+                    .filter(Boolean)
+            );
+            const localOnlyLeads = this.leads.filter((lead) => (
+                !lead.row && !remoteEmails.has(lead.email.toLowerCase())
+            ));
+            this.leads = [...remoteLeads, ...localOnlyLeads];
+            this.saveLeads();
+            this.renderLeadList();
+            this.renderLeadDetails();
+            this.updateLeadCount();
+        } catch (error) {
+            console.warn('Live lead sync unavailable; using saved dashboard data.', error);
+        }
     }
 
     // Connect all modal and form events to the lead lifecycle.
@@ -83,7 +148,7 @@ class LeadManager {
             }
         });
 
-        this.form.addEventListener('submit', (event) => {
+        this.form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const newLead = this.getLeadFromForm();
 
@@ -91,7 +156,13 @@ class LeadManager {
                 return;
             }
 
+            const remoteSaved = await this.createRemoteLead(newLead);
+
             this.leads.push(newLead);
+            if (remoteSaved) {
+                await this.syncRemoteLeads();
+            }
+            this.saveLeads();
             this.selectedLeadId = newLead.id;
             this.renderLeadList();
             this.renderLeadDetails();
@@ -377,16 +448,56 @@ class LeadManager {
 
                 if (action === 'contacted') {
                     lead.status = 'Contacted';
+
+                    if (lead.row) {
+                        this.markRemoteLeadContacted(lead.row);
+                    }
                 }
 
                 if (action === 'booked') {
                     lead.status = 'Booked';
                 }
 
+                this.saveLeads();
                 this.renderLeadList();
                 this.renderLeadDetails();
             });
         });
+    }
+
+    async markRemoteLeadContacted(row) {
+        try {
+            await fetch(`${LEADS_API_URL}?action=mark_contacted&row=${encodeURIComponent(row)}`);
+        } catch (error) {
+            console.warn('Could not sync Contacted status to the lead sheet.', error);
+        }
+    }
+
+    async createRemoteLead(lead) {
+        const params = new URLSearchParams({
+            action: 'add_leads',
+            payload: JSON.stringify([{
+                Name: lead.customerName,
+                Email: lead.email,
+                Phone: lead.phone,
+                Service: lead.serviceRequested,
+                Message: `${lead.companyName}\n${lead.notes}`.trim(),
+                Status: 'New',
+            }]),
+        });
+
+        try {
+            const response = await fetch(`${LEADS_API_URL}?${params.toString()}`, {
+                headers: { Accept: 'application/json' },
+            });
+            const result = await response.json();
+
+            return Boolean(result.success);
+        } catch (error) {
+            console.warn('Create-lead API unavailable; saving this lead locally.', error);
+        }
+
+        return false;
     }
 
     calculateLeadScore(lead) {
