@@ -5,8 +5,10 @@ import urllib.request
 import urllib.parse
 import re
 import base64
+from pathlib import Path
 from email.message import EmailMessage
 
+from dotenv import load_dotenv
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -17,16 +19,21 @@ from googleapiclient.discovery import build
 # CONFIG
 # ============================================================
 
-MODEL = r"C:\Users\DJ\Downloads\meta-llama-3.1-8b-instruct-abliterated-q4_k_m 2.gguf"
+ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(ROOT / ".env")
 
-LEADS_URL = (
-    "https://script.google.com/macros/s/"
-    "AKfycbzcIEdgtU1s9oz54OBAltFdzfCsTHeIafgBHdJRga_-RSDVr8Yt_Q2E83O1MnNclWQuRw"
-    "/exec"
+MODEL = os.environ.get(
+    "AIBUDS_MODEL",
+    str(ROOT / "ai_models" / "Qwen3-VL-4B-Instruct-Uncensored-abliterated.Q5_K_M.gguf"),
 )
 
-CREDENTIALS_FILE = "credentials.json"
-TOKEN_FILE = "token.json"
+LEADS_URL = os.environ.get(
+    "AIBUDS_LEADS_URL",
+    "https://script.google.com/macros/s/AKfycbw2TbbigAIsPvEPZuuj1Jel5EprFszhVM-tBhOJy69D8DZSJK4uZe8hYl-3qN4VaIUo/exec"
+)
+
+CREDENTIALS_FILE = ROOT / "agent" / "credentials.json"
+TOKEN_FILE = ROOT / "agent" / "token.json"
 
 SENDER_EMAIL = "aibudbots.ai@gmail.com"
 
@@ -118,7 +125,7 @@ def get_gmail_service():
     if os.path.exists(TOKEN_FILE):
 
         creds = Credentials.from_authorized_user_file(
-            TOKEN_FILE,
+            str(TOKEN_FILE),
             SCOPES
         )
 
@@ -141,13 +148,13 @@ def get_gmail_service():
             ):
 
                 raise RuntimeError(
-                    "credentials.json was not found."
+                    f"credentials.json was not found at: {CREDENTIALS_FILE}"
                 )
 
             flow = (
                 InstalledAppFlow
                 .from_client_secrets_file(
-                    CREDENTIALS_FILE,
+                    str(CREDENTIALS_FILE),
                     SCOPES
                 )
             )
@@ -194,7 +201,8 @@ def ask_ai(prompt):
             "--no-display-prompt"
         ],
         capture_output=True,
-        text=True
+        text=True,
+        encoding="utf-8"
     )
 
     if result.returncode != 0:
@@ -303,6 +311,8 @@ def extract_email(decision):
         .strip()
     )
 
+    subject = subject.encode("ascii", "ignore").decode("ascii")
+
     body = (
         match.group(2)
         .strip()
@@ -341,6 +351,32 @@ def extract_email(decision):
         flags=re.IGNORECASE | re.DOTALL
     )
 
+    mojibake_markers = ("â", "ð", "ï")
+
+    if any(marker in body for marker in mojibake_markers):
+        try:
+            body = body.encode("cp1252").decode("utf-8")
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            pass
+
+    body = (
+        body
+        .replace("â€™", "'")
+        .replace("â€˜", "'")
+        .replace("â€œ", '"')
+        .replace("â€", '"')
+        .replace("â€”", "-")
+        .replace("â€“", "-")
+        .replace("’", "'")
+        .replace("‘", "'")
+        .replace("“", '"')
+        .replace("”", '"')
+        .replace("—", "-")
+        .replace("–", "-")
+    )
+
+    body = body.encode("ascii", "ignore").decode("ascii")
+
     body = body.strip()
 
     if not body:
@@ -356,6 +392,30 @@ def extract_email(decision):
 
 
 # ============================================================
+# STARTUP VALIDATION
+# ============================================================
+
+def validate_runtime():
+
+    if not MODEL or not os.path.exists(MODEL):
+        raise RuntimeError(
+            f"Model file not found: {MODEL}"
+        )
+
+    if not LEADS_URL:
+        raise RuntimeError(
+            "AIBUDS_LEADS_URL is not configured."
+        )
+
+    health = sheet_request("get_leads")
+
+    if not health.get("success"):
+        raise RuntimeError(
+            health.get("error", "Sheet endpoint is not responding successfully.")
+        )
+
+
+# ============================================================
 # MAIN
 # ============================================================
 
@@ -366,7 +426,7 @@ print("======================================")
 print()
 
 print("Checking for leads...")
-
+validate_runtime()
 
 all_leads = get_leads()
 
@@ -481,10 +541,15 @@ Requirements:
 - Address the customer by first name.
 - Acknowledge what they originally requested.
 - Mention the service naturally.
-- Show that their request matters.
+- Show that their request matters without using canned phrases such as "ASAP", "right away", or "we are prioritizing".
 - Make the next step easy.
 - Encourage a reply or phone call.
 - Keep it approximately 60-120 words.
+- Use plain ASCII punctuation only: straight apostrophes, double quotes, and hyphens. Do not use curly quotes, em dashes, or en dashes.
+- Sound warm and specific to this customer, not like an automated status update.
+- Do not ask the customer to choose a time or imply that a time is being held or reserved.
+- Do not use phrases such as "let me know a time that works", "I'll hold it open", "we'll get back to you right away", or "your time matters".
+- End with a natural invitation to reply to this email or call 456-098-0987.
 - Do not invent prices.
 - Do not invent appointment times.
 - Do not claim an inspection happened.
