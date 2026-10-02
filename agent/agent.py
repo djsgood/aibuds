@@ -20,6 +20,10 @@ from googleapiclient.discovery import build
 # ============================================================
 
 ROOT = Path(__file__).resolve().parent.parent
+CONFIG_FILE = ROOT / "agent" / "config" / "business.json"
+
+with open(CONFIG_FILE, "r", encoding="utf-8") as config_file:
+    BUSINESS = json.load(config_file)
 load_dotenv(ROOT / ".env")
 
 MODEL = os.environ.get(
@@ -27,17 +31,14 @@ MODEL = os.environ.get(
     str(ROOT / "ai_models" / "Qwen3-VL-4B-Instruct-Uncensored-abliterated.Q5_K_M.gguf"),
 )
 
-LEADS_URL = os.environ.get(
-    "AIBUDS_LEADS_URL",
-    "https://script.google.com/macros/s/AKfycbw2TbbigAIsPvEPZuuj1Jel5EprFszhVM-tBhOJy69D8DZSJK4uZe8hYl-3qN4VaIUo/exec"
-)
+LEADS_URL = BUSINESS["leads_url"]
 
 CREDENTIALS_FILE = ROOT / "agent" / "credentials.json"
 TOKEN_FILE = ROOT / "agent" / "token.json"
 
-SENDER_EMAIL = "aibudbots.ai@gmail.com"
+SENDER_EMAIL = BUSINESS["sender_email"]
 
-SIGNATURE = "Best regards,\nAIBudBots"
+SIGNATURE = BUSINESS["signature"]
 
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.send"
@@ -549,7 +550,7 @@ Requirements:
 - Sound warm and specific to this customer, not like an automated status update.
 - Do not ask the customer to choose a time or imply that a time is being held or reserved.
 - Do not use phrases such as "let me know a time that works", "I'll hold it open", "we'll get back to you right away", or "your time matters".
-- End with a natural invitation to reply to this email or call 456-098-0987.
+- End with a natural invitation to reply to this email or call {BUSINESS["business_phone"]}.
 - Do not invent prices.
 - Do not invent appointment times.
 - Do not claim an inspection happened.

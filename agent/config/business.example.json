@@ -1,0 +1,8 @@
+{
+  "business_name": "CUSTOMER BUSINESS NAME",
+  "sender_name": "CUSTOMER NAME",
+  "sender_email": "customer@example.com",
+  "business_phone": "555-555-5555",
+  "signature": "Best regards,\nCUSTOMER NAME",
+  "leads_url": "CUSTOMER GOOGLE APPS SCRIPT URL"
+}

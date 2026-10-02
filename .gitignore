@@ -3,8 +3,10 @@ agent/token.json
 agent/credentials.json
 __pycache__/
 *.pyc
+*.pycss
 prospects.json
 enriched_prospects.json
 assets/data/leads.json
-agent/API_Service Details*
 agent/__pycache__/
+agent/API_Service Details*/
+agent/config/business.json
