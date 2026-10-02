@@ -10,3 +10,4 @@ assets/data/leads.json
 agent/__pycache__/
 agent/API_Service Details*/
 agent/config/business.json
+agent/token*.json
