@@ -46,3 +46,4 @@ echo business.json, test data, and development
 echo files were NOT included.
 echo.
 pause
+copy "agent\credentials.json" "customer_package\agent\credentials.json" >nul

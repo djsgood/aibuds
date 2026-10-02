@@ -31,6 +31,11 @@ MODEL = os.environ.get(
     str(ROOT / "ai_models" / "Qwen3-VL-4B-Instruct-Uncensored-abliterated.Q5_K_M.gguf"),
 )
 
+HF_REPO = os.environ.get(
+    "AIBUDS_HF_REPO",
+    "mradermacher/Qwen3-VL-4B-Instruct-Uncensored-abliterated-GGUF:Q5_K_M",
+)
+
 LEADS_URL = BUSINESS["leads_url"]
 
 CREDENTIALS_FILE = ROOT / "agent" / "credentials.json"
@@ -187,11 +192,16 @@ def get_gmail_service():
 
 def ask_ai(prompt):
 
+    model_args = (
+        ["-m", MODEL]
+        if MODEL and os.path.exists(MODEL)
+        else ["--hf-repo", HF_REPO]
+    )
+
     result = subprocess.run(
         [
             "llama-cli",
-            "-m",
-            MODEL,
+            *model_args,
             "--device",
             "none",
             "-p",
@@ -399,8 +409,14 @@ def extract_email(decision):
 def validate_runtime():
 
     if not MODEL or not os.path.exists(MODEL):
+        print(
+            "Local AI model not found. "
+            "AIBudBots will use the configured Hugging Face model."
+        )
+
+    if not HF_REPO:
         raise RuntimeError(
-            f"Model file not found: {MODEL}"
+            "No local AI model or Hugging Face model repository is configured."
         )
 
     if not LEADS_URL:

@@ -46,8 +46,8 @@ echo.
 
 where llama-cli >nul 2>&1
 if errorlevel 1 (
-    echo WARNING: llama-cli was not found.
-    echo AIBudBots still needs llama.cpp before it can run.
+    echo ERROR: llama-cli was not found.
+    echo Install llama.cpp before continuing.
     echo.
     pause
     exit /b 1
@@ -55,10 +55,53 @@ if errorlevel 1 (
 
 echo llama.cpp found.
 echo.
+echo Preparing business configuration...
+echo.
+
+if not exist "agent\config\business.json" (
+    if not exist "agent\config\business.example.json" (
+        echo ERROR: business.example.json is missing.
+        echo.
+        pause
+        exit /b 1
+    )
+
+    copy "agent\config\business.example.json" "agent\config\business.json" >nul
+
+    if errorlevel 1 (
+        echo ERROR: Could not create business.json.
+        echo.
+        pause
+        exit /b 1
+    )
+
+    echo Created agent\config\business.json
+) else (
+    echo Existing business.json preserved.
+)
+
+echo.
+echo Checking Gmail configuration...
+echo.
+
+if not exist "agent\credentials.json" (
+    echo WARNING: agent\credentials.json is missing.
+    echo Gmail authorization cannot run until it is added.
+    echo.
+) else (
+    echo Gmail OAuth credentials found.
+)
+
+echo.
 echo ======================================
 echo       AIBudBots Setup Complete
 echo ======================================
 echo.
-echo You can now run START_AIBUDBOTS.bat
+echo NEXT STEP:
+echo Edit:
+echo agent\config\business.json
+echo.
+echo Enter the customer's business information.
+echo Then run START_AIBUDBOTS.bat
 echo.
 pause
